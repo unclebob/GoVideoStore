@@ -5,63 +5,85 @@ import (
 )
 
 var customer *Customer
+var newRelease1 *Movie
+var newRelease2 *Movie
+var childrensMovie *Movie
+var regular1 *Movie
+var regular2 *Movie
+var regular3 *Movie
 
 func setup() {
-	customer = NewCustomer("Fred")
+	customer = NewCustomer("Customer Name")
+	newRelease1 = NewMovie("New Release 1", NewRelease)
+	newRelease2 = NewMovie("New Release 2", NewRelease)
+	childrensMovie = NewMovie("Childrens", Childrens)
+	regular1 = NewMovie("Regular 1", Regular)
+	regular2 = NewMovie("Regular 2", Regular)
+	regular3 = NewMovie("Regular 3", Regular)
 }
 
-func assertEquals(t *testing.T, expected string, statement string) {
-	if statement != expected {
-		t.Errorf("\nExpected:\n%s\n\nGot:\n%s", expected, statement)
+func assertStringsEqual(t *testing.T, expected string, actual string) {
+	if actual != expected {
+		t.Errorf("\nExpected:\n%s\n\nGot:\n%s", expected, actual)
 	}
 }
 
-func TestSingleNewReleaseStatement(t *testing.T) {
-	setup()
-	customer.addRental(NewRental(NewMovie("The Cell", NewRelease), 3))
-	assertEquals(t,
-		"Rental Record for Fred\n"+
-			"\tThe Cell\t9.0\n"+
-			"Amount owed is 9.0\n"+
-			"You earned 2 frequent renter points",
-		customer.statement())
+func assertIntsEqual(t *testing.T, expected int, actual int) {
+	if actual != expected {
+		t.Errorf("\nExpected:%d Got:%d", expected, actual)
+	}
 }
 
-func TestDualNewReleaseStatement(t *testing.T) {
-	setup()
-	customer.addRental(NewRental(NewMovie("The Cell", NewRelease), 3))
-	customer.addRental(NewRental(NewMovie("The Tigger Movie", NewRelease), 3))
-	assertEquals(t,
-		"Rental Record for Fred\n"+
-			"\tThe Cell\t9.0\n"+
-			"\tThe Tigger Movie\t9.0\n"+
-			"Amount owed is 18.0\n"+
-			"You earned 4 frequent renter points",
-		customer.statement())
+func assertFloatsEqual(t *testing.T, expected float64, actual float64) {
+	if actual != expected {
+		t.Errorf("\nExpected:%f Got:%f", expected, actual)
+	}
 }
 
-func TestSingleChildrensStatement(t *testing.T) {
-	setup()
-	customer.addRental(NewRental(NewMovie("The Tigger Movie", Childrens), 3))
-	assertEquals(t,
-		"Rental Record for Fred\n"+
-			"\tThe Tigger Movie\t1.5\n"+
-			"Amount owed is 1.5\n"+
-			"You earned 1 frequent renter points",
-		customer.statement())
+func assertOwedAndPoints(t *testing.T, owed float64, points int) {
+	customer.makeStatement()
+	assertFloatsEqual(t, owed, customer.totalAmount)
+	assertIntsEqual(t, points, customer.frequentRenterPoints)
 }
 
-func TestMultipleRegularStatement(t *testing.T) {
+func TestTotalsForOneNewRelease(t *testing.T) {
 	setup()
-	customer.addRental(NewRental(NewMovie("Plan 9 from Outer Space", Regular), 1))
-	customer.addRental(NewRental(NewMovie("8 1/2", Regular), 2))
-	customer.addRental(NewRental(NewMovie("Eraserhead", Regular), 3))
-	assertEquals(t,
-		"Rental Record for Fred\n"+
-			"\tPlan 9 from Outer Space\t2.0\n"+
-			"\t8 1/2\t2.0\n"+
-			"\tEraserhead\t3.5\n"+
+	customer.addRental(NewRental(newRelease1, 3))
+	assertOwedAndPoints(t, 9.0, 2)
+}
+
+func TestTotalsForTwoNewReleases(t *testing.T) {
+	setup()
+	customer.addRental(NewRental(newRelease1, 3))
+	customer.addRental(NewRental(newRelease2, 3))
+	assertOwedAndPoints(t, 18.0, 4)
+}
+
+func TestTotalsForOneChildrensMovie(t *testing.T) {
+	setup()
+	customer.addRental(NewRental(childrensMovie, 3))
+	assertOwedAndPoints(t, 1.5, 1)
+}
+
+func TestTotalsForManyRegularMovies(t *testing.T) {
+	setup()
+	customer.addRental(NewRental(regular1, 1))
+	customer.addRental(NewRental(regular2, 2))
+	customer.addRental(NewRental(regular3, 3))
+	assertOwedAndPoints(t, 7.5, 3)
+}
+
+func TestStatementFormat(t *testing.T) {
+	setup()
+	customer.addRental(NewRental(regular1, 1))
+	customer.addRental(NewRental(regular2, 2))
+	customer.addRental(NewRental(regular3, 3))
+	assertStringsEqual(t,
+		"Rental Record for Customer Name\n"+
+			"\tRegular 1\t2.0\n"+
+			"\tRegular 2\t2.0\n"+
+			"\tRegular 3\t3.5\n"+
 			"Amount owed is 7.5\n"+
 			"You earned 3 frequent renter points",
-		customer.statement())
+		customer.makeStatement())
 }
