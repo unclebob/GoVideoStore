@@ -1,16 +1,9 @@
 package GoVideoStore
 
-const (
-	Regular int = iota
-	NewRelease
-	Childrens
-)
-
 type Movie struct {
-	title     string
-	movieType int
+	title string
 }
 
-func NewMovie(title string, movieType int) *Movie {
-	return &Movie{title: title, movieType: movieType}
+func NewMovie(title string) *Movie {
+	return &Movie{title: title}
 }
