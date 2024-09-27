@@ -11,6 +11,10 @@ var childrensMovie *Movie
 var regular1 *Movie
 var regular2 *Movie
 var regular3 *Movie
+var rentalFactory RentalTypeFactory
+var newReleaseRental RentalType
+var childrensRental RentalType
+var regularRental RentalType
 
 func setup() {
 	statement = NewStatement("RentalStatement Name")
@@ -20,6 +24,10 @@ func setup() {
 	regular1 = NewMovie("Regular 1")
 	regular2 = NewMovie("Regular 2")
 	regular3 = NewMovie("Regular 3")
+	rentalFactory = RentalTypeFactoryImpl{}
+	newReleaseRental = rentalFactory.make("new release")
+	childrensRental = rentalFactory.make("childrens")
+	regularRental = rentalFactory.make("regular")
 }
 
 func assertStringsEqual(t *testing.T, expected string, actual string) {
@@ -48,36 +56,36 @@ func assertOwedAndPoints(t *testing.T, owed float64, points int) {
 
 func TestTotalsForOneNewRelease(t *testing.T) {
 	setup()
-	statement.addRental(NewRental(newRelease1, NewReleaseRental{}, 3))
+	statement.addRental(NewRental(newRelease1, newReleaseRental, 3))
 	assertOwedAndPoints(t, 9.0, 2)
 }
 
 func TestTotalsForTwoNewReleases(t *testing.T) {
 	setup()
-	statement.addRental(NewRental(newRelease1, NewReleaseRental{}, 3))
-	statement.addRental(NewRental(newRelease2, NewReleaseRental{}, 3))
+	statement.addRental(NewRental(newRelease1, newReleaseRental, 3))
+	statement.addRental(NewRental(newRelease2, newReleaseRental, 3))
 	assertOwedAndPoints(t, 18.0, 4)
 }
 
 func TestTotalsForOneChildrensMovie(t *testing.T) {
 	setup()
-	statement.addRental(NewRental(childrensMovie, ChildrensRental{}, 3))
+	statement.addRental(NewRental(childrensMovie, childrensRental, 3))
 	assertOwedAndPoints(t, 1.5, 1)
 }
 
 func TestTotalsForManyRegularMovies(t *testing.T) {
 	setup()
-	statement.addRental(NewRental(regular1, RegularRental{}, 1))
-	statement.addRental(NewRental(regular2, RegularRental{}, 2))
-	statement.addRental(NewRental(regular3, RegularRental{}, 3))
+	statement.addRental(NewRental(regular1, regularRental, 1))
+	statement.addRental(NewRental(regular2, regularRental, 2))
+	statement.addRental(NewRental(regular3, regularRental, 3))
 	assertOwedAndPoints(t, 7.5, 3)
 }
 
 func TestStatementFormat(t *testing.T) {
 	setup()
-	statement.addRental(NewRental(regular1, RegularRental{}, 1))
-	statement.addRental(NewRental(regular2, RegularRental{}, 2))
-	statement.addRental(NewRental(regular3, RegularRental{}, 3))
+	statement.addRental(NewRental(regular1, regularRental, 1))
+	statement.addRental(NewRental(regular2, regularRental, 2))
+	statement.addRental(NewRental(regular3, regularRental, 3))
 	assertStringsEqual(t,
 		"Rental Record for RentalStatement Name\n"+
 			"\tRegular 1\t2.0\n"+
